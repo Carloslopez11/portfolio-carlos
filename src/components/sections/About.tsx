@@ -21,7 +21,7 @@ export default function About() {
           <div className="w-48 h-48 md:w-64 md:h-64 shrink-0 relative group">
             <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl group-hover:bg-emerald-500/40 transition-all duration-500"></div>
             <img 
-              src="https://github.com/Carloslopez11.png" 
+              src="/profile.png" 
               alt="Carlos Lopez" 
               className="w-full h-full object-cover rounded-full border-2 border-white/10 relative z-10 shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-500"
             />
