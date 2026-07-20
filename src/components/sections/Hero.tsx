@@ -36,11 +36,11 @@ export default function Hero() {
       </h1>
       
       <h2 className="text-xl sm:text-2xl font-medium text-zinc-300 mb-8">
-        Engenheiro de Software & Desenvolvedor Full Stack
+        Desenvolvedor Full Stack & Construtor de Produtos
       </h2>
       
       <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed mb-12">
-        Construindo experiências digitais de ponta e produtos reais. Focado na interseção entre <strong className="text-white">Código Premium</strong> e <strong className="text-white">Inteligência Artificial</strong>.
+        Tenho uma facilidade enorme para tirar ideias do papel e transformá-las em <strong className="text-white">produtos reais e lucrativos</strong>. Foco em execução rápida, automação e uso intenso de <strong className="text-white">Inteligência Artificial</strong>.
       </p>
 
       <ul className="flex items-center justify-center gap-8">
