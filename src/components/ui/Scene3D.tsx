@@ -35,123 +35,165 @@ function ParticleCloud({ ...props }) {
 
 import * as THREE from "three";
 
-function MeteoritesAndExplosions() {
-  const meteorsCount = 10;
-  const explosionsCount = 5;
+// Choques Coreografiados y Chispas de Fuego
+function ChoreographedExplosions() {
+  const meteorsCount = 6; // 3 pares chocando
+  const sparksCount = 150; // Pool de partículas de fuego
   
-  const meteors = useRef(
-    Array.from({ length: meteorsCount }).map(() => ({
-      active: true,
-      position: new THREE.Vector3(2 + Math.random() * 4, 2 + Math.random() * 4, -1 - Math.random() * 2),
-      velocity: new THREE.Vector3(-1 - Math.random() * 2, -1 - Math.random() * 2, 0),
-      rotationSpeed: new THREE.Vector3(Math.random() * 5, Math.random() * 5, Math.random() * 5),
-      scale: 0.02 + Math.random() * 0.03
-    }))
-  );
-
-  const explosions = useRef(
-    Array.from({ length: explosionsCount }).map(() => ({
+  const pairs = useRef(
+    Array.from({ length: meteorsCount / 2 }).map(() => ({
       active: false,
-      position: new THREE.Vector3(0, 0, 0),
+      timer: Math.random() * 4,
+      mA: { position: new THREE.Vector3(), velocity: new THREE.Vector3(), scale: 0.04 },
+      mB: { position: new THREE.Vector3(), velocity: new THREE.Vector3(), scale: 0.04 },
+      collisionPoint: new THREE.Vector3(),
       life: 0
     }))
   );
 
-  const meteorMeshes = useRef<(THREE.Mesh | null)[]>([]);
-  const explosionMeshes = useRef<(THREE.Mesh | null)[]>([]);
-  const explosionMaterials = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
+  const sparks = useRef(
+    Array.from({ length: sparksCount }).map(() => ({
+      active: false,
+      position: new THREE.Vector3(),
+      velocity: new THREE.Vector3(),
+      life: 0
+    }))
+  );
+  
+  const mMeshesA = useRef<(THREE.Mesh | null)[]>([]);
+  const mMeshesB = useRef<(THREE.Mesh | null)[]>([]);
+  const sparkMeshes = useRef<(THREE.Mesh | null)[]>([]);
+  const sparkMats = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
+
+  const startCollisionSequence = (pair: any) => {
+    pair.active = true;
+    pair.life = 1.5; // 1.5 segundos de vuelo hasta impactar
+    
+    // Punto de impacto amplio para separarlos bien
+    pair.collisionPoint.set(
+      (Math.random() - 0.5) * 12, // x más disperso
+      (Math.random() - 0.5) * 8,  // y más disperso
+      -2 - Math.random() * 4      // z más profundo
+    );
+    
+    // Roca A sale desde lejos
+    pair.mA.position.set(
+      pair.collisionPoint.x - 6 - Math.random() * 3,
+      pair.collisionPoint.y + 6 + Math.random() * 3,
+      pair.collisionPoint.z
+    );
+    
+    // Roca B sale del lado opuesto
+    pair.mB.position.set(
+      pair.collisionPoint.x + 6 + Math.random() * 3,
+      pair.collisionPoint.y - 6 - Math.random() * 3,
+      pair.collisionPoint.z
+    );
+    
+    // Matemáticas para choque exacto
+    pair.mA.velocity.subVectors(pair.collisionPoint, pair.mA.position).divideScalar(pair.life);
+    pair.mB.velocity.subVectors(pair.collisionPoint, pair.mB.position).divideScalar(pair.life);
+  };
+
+  const triggerExplosion = (point: THREE.Vector3) => {
+    let spawned = 0;
+    for (let i = 0; i < sparks.current.length; i++) {
+      const s = sparks.current[i];
+      if (!s.active) {
+        s.active = true;
+        s.position.copy(point);
+        // Explosión de chispas en todas las direcciones
+        s.velocity.set(
+          (Math.random() - 0.5) * 15,
+          (Math.random() - 0.5) * 15,
+          (Math.random() - 0.5) * 15
+        );
+        s.life = 0.5 + Math.random() * 0.8;
+        spawned++;
+        if (spawned > 40) break; // 40 chispas de fuego por explosión
+      }
+    }
+  };
 
   useFrame((state, delta) => {
-    const mList = meteors.current;
-    const eList = explosions.current;
+    // Vuelo y Choque
+    pairs.current.forEach((p, i) => {
+      const meshA = mMeshesA.current[i];
+      const meshB = mMeshesB.current[i];
+      if (!meshA || !meshB) return;
 
-    // Mover rocas y rotarlas
-    mList.forEach((m, i) => {
-      const mesh = meteorMeshes.current[i];
-      if (!mesh) return;
-
-      if (!m.active) {
-        mesh.visible = false;
+      if (!p.active) {
+        meshA.visible = false;
+        meshB.visible = false;
+        p.timer -= delta;
+        if (p.timer <= 0) startCollisionSequence(p);
         return;
       }
-      mesh.visible = true;
-      m.position.addScaledVector(m.velocity, delta);
-      mesh.position.copy(m.position);
-      mesh.rotation.x += m.rotationSpeed.x * delta;
-      mesh.rotation.y += m.rotationSpeed.y * delta;
 
-      // Resetear si salen de pantalla
-      if (m.position.x < -3 || m.position.y < -3) {
-        m.position.set(2 + Math.random() * 4, 2 + Math.random() * 4, -1 - Math.random() * 2);
+      meshA.visible = true;
+      meshB.visible = true;
+      p.mA.position.addScaledVector(p.mA.velocity, delta);
+      p.mB.position.addScaledVector(p.mB.velocity, delta);
+      meshA.position.copy(p.mA.position);
+      meshB.position.copy(p.mB.position);
+      
+      meshA.rotation.x += delta * 15;
+      meshB.rotation.y += delta * 15;
+
+      p.life -= delta;
+      if (p.life <= 0) {
+        // ¡BOOM!
+        p.active = false;
+        p.timer = 2 + Math.random() * 4; // Esperar para el siguiente choque
+        triggerExplosion(p.collisionPoint);
       }
     });
 
-    // Calcular colisiones (O(N^2))
-    for (let i = 0; i < mList.length; i++) {
-      if (!mList[i].active) continue;
-      for (let j = i + 1; j < mList.length; j++) {
-        if (!mList[j].active) continue;
-        
-        if (mList[i].position.distanceTo(mList[j].position) < 0.15) {
-          // ¡Impacto!
-          mList[i].active = false;
-          mList[j].active = false;
-          
-          // Activar explosión
-          const exp = eList.find(e => !e.active);
-          if (exp) {
-            exp.active = true;
-            exp.position.copy(mList[i].position);
-            exp.life = 1.0; // Dura 1 segundo
-          }
-          
-          // Revivir las rocas después de 2 segundos
-          setTimeout(() => { mList[i].active = true; mList[i].position.set(2 + Math.random() * 4, 2 + Math.random() * 4, -1 - Math.random() * 2); }, 2000);
-          setTimeout(() => { mList[j].active = true; mList[j].position.set(2 + Math.random() * 4, 2 + Math.random() * 4, -1 - Math.random() * 2); }, 2000);
-        }
-      }
-    }
-
-    // Animar explosiones (crecimiento y desvanecimiento)
-    eList.forEach((e, i) => {
-      const mesh = explosionMeshes.current[i];
-      const mat = explosionMaterials.current[i];
+    // Lluvia de fuego (Chispas)
+    sparks.current.forEach((s, i) => {
+      const mesh = sparkMeshes.current[i];
+      const mat = sparkMats.current[i];
       if (!mesh || !mat) return;
 
-      if (!e.active) {
+      if (!s.active) {
         mesh.visible = false;
         return;
       }
       mesh.visible = true;
-      mesh.position.copy(e.position);
+      s.position.addScaledVector(s.velocity, delta);
+      s.velocity.multiplyScalar(0.92); // Fricción
+      mesh.position.copy(s.position);
       
-      e.life -= delta * 1.5;
-      if (e.life <= 0) {
-        e.active = false;
+      s.life -= delta;
+      if (s.life <= 0) {
+        s.active = false;
       } else {
-        // Crece y se hace transparente
-        const scale = 0.5 - (e.life * 0.5); 
-        mesh.scale.set(scale, scale, scale);
-        mat.opacity = e.life;
+        mat.opacity = s.life * 1.5;
       }
     });
   });
 
   return (
     <group>
-      {/* Rocas de Magma (Icosaedros) */}
-      {meteors.current.map((m, i) => (
-        <mesh key={`meteor-${i}`} ref={(el) => (meteorMeshes.current[i] = el)} scale={m.scale}>
-          <icosahedronGeometry args={[1, 0]} />
-          <meshStandardMaterial color="#ff4500" emissive="#ff8c00" emissiveIntensity={2} wireframe={true} />
-        </mesh>
+      {/* Meteoritos de Fuego */}
+      {pairs.current.map((p, i) => (
+        <group key={`pair-${i}`}>
+          <mesh ref={(el) => (mMeshesA.current[i] = el)} scale={p.mA.scale}>
+            <icosahedronGeometry args={[1, 1]} />
+            <meshStandardMaterial color="#ff0000" emissive="#ff4500" emissiveIntensity={4} wireframe={true} />
+          </mesh>
+          <mesh ref={(el) => (mMeshesB.current[i] = el)} scale={p.mB.scale}>
+            <icosahedronGeometry args={[1, 1]} />
+            <meshStandardMaterial color="#ff0000" emissive="#ff4500" emissiveIntensity={4} wireframe={true} />
+          </mesh>
+        </group>
       ))}
 
-      {/* Explosiones (Esferas brillantes que crecen) */}
-      {explosions.current.map((e, i) => (
-        <mesh key={`exp-${i}`} ref={(el) => (explosionMeshes.current[i] = el)}>
-          <sphereGeometry args={[1, 16, 16]} />
-          <meshBasicMaterial ref={(el) => (explosionMaterials.current[i] = el)} color="#ffaa00" transparent opacity={0} depthWrite={false} />
+      {/* Chispas de Explosión */}
+      {sparks.current.map((s, i) => (
+        <mesh key={`spark-${i}`} ref={(el) => (sparkMeshes.current[i] = el)} scale={0.015}>
+          <icosahedronGeometry args={[1, 0]} />
+          <meshBasicMaterial ref={(el) => (sparkMats.current[i] = el)} color="#ffaa00" transparent opacity={0} depthWrite={false} />
         </mesh>
       ))}
     </group>
@@ -165,7 +207,7 @@ export default function Scene3D() {
         <ambientLight intensity={0.5} />
         <Suspense fallback={null}>
           <ParticleCloud />
-          <MeteoritesAndExplosions />
+          <ChoreographedExplosions />
         </Suspense>
       </Canvas>
     </div>
