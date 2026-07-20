@@ -10,7 +10,7 @@ export default function ProjectsGrid() {
         Trabalho Recente
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left mb-16">
         {projectsData.map((project, i) => (
           <motion.div
             key={project.id}
@@ -18,7 +18,7 @@ export default function ProjectsGrid() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: i * 0.1 }}
-            className={`group relative rounded-3xl overflow-hidden bg-white/5 backdrop-blur-md flex flex-col justify-between ${project.id === "devclub-landing" ? "md:col-span-2 lg:col-span-3" : ""}`}
+            className="group relative rounded-3xl overflow-hidden bg-white/5 backdrop-blur-md flex flex-col justify-between"
           >
             {/* Borde Neón Auto-Iluminado */}
             <motion.div 
@@ -37,7 +37,7 @@ export default function ProjectsGrid() {
             
             <div className="relative z-10 p-8 sm:p-10 flex flex-col h-full">
               <div className="flex-grow">
-                <h3 className="text-3xl font-bold text-white mb-4 group-hover:text-emerald-400 transition-colors">
+                <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-emerald-400 transition-colors">
                   {project.title}
                 </h3>
                 
@@ -78,6 +78,18 @@ export default function ProjectsGrid() {
             </div>
           </motion.div>
         ))}
+      </div>
+
+      <div className="flex justify-center">
+        <a 
+          href="https://github.com/Carloslopez11" 
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-bold hover:bg-emerald-400 hover:text-black transition-all duration-300 hover:scale-105"
+        >
+          Ver Todos os Projetos
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
       </div>
     </section>
   );
