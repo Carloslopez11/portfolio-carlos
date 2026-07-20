@@ -108,18 +108,18 @@ function ChoreographedExplosions() {
   };
 
   const triggerExplosion = (point: THREE.Vector3) => {
-    // 1. Crear el destello gigante (Flash)
+    // 1. Destello sutil y mucho más pequeño (no distrae)
     const flash = flashes.current.find(f => !f.active);
     if (flash) {
       flash.active = true;
       flash.position.copy(point);
-      flash.scale = 0.1;
-      flash.life = 0.3; // Dura solo 0.3 segundos
+      flash.scale = 0.05;
+      flash.life = 0.15; // Rapidísimo
     }
 
-    // 2. Chispas caóticas de fuego
+    // 2. Pedazos de roca en llamas (Debris)
     let spawned = 0;
-    const numSparks = 50 + Math.random() * 30; // Entre 50 y 80 chispas por choque
+    const numSparks = 40 + Math.random() * 20; 
     
     for (let i = 0; i < sparks.current.length; i++) {
       const s = sparks.current[i];
@@ -127,22 +127,24 @@ function ChoreographedExplosions() {
         s.active = true;
         s.position.copy(point);
         
-        // Direcciones completamente caóticas
-        const speed = 5 + Math.random() * 25; // Algunas lentas, otras como balas
+        const speed = 3 + Math.random() * 15; 
         s.velocity.set(
           (Math.random() - 0.5) * speed,
           (Math.random() - 0.5) * speed,
           (Math.random() - 0.5) * speed
         );
         
-        s.scale = 0.01 + Math.random() * 0.04; // Tamaños de escombros muy variados
-        s.life = 0.3 + Math.random() * 0.7;
+        // Rocas más grandes y visibles
+        s.scale = 0.03 + Math.random() * 0.05; 
+        s.life = 0.5 + Math.random() * 1.5; // Duran más tiempo en el aire
         
-        // Color aleatorio de fuego
         s.color.set(fireColors[Math.floor(Math.random() * fireColors.length)]);
         
         if (sparkMats.current[i]) {
+          // @ts-ignore
           sparkMats.current[i]!.color.copy(s.color);
+          // @ts-ignore
+          sparkMats.current[i]!.emissive.copy(s.color);
         }
 
         spawned++;
@@ -152,7 +154,6 @@ function ChoreographedExplosions() {
   };
 
   useFrame((state, delta) => {
-    // Vuelo y Choque
     pairs.current.forEach((p, i) => {
       const meshA = mMeshesA.current[i];
       const meshB = mMeshesB.current[i];
@@ -184,7 +185,6 @@ function ChoreographedExplosions() {
       }
     });
 
-    // Animar Destellos (Onda expansiva)
     flashes.current.forEach((f, i) => {
       const mesh = flashMeshes.current[i];
       const mat = flashMats.current[i];
@@ -198,17 +198,16 @@ function ChoreographedExplosions() {
       mesh.position.copy(f.position);
       
       f.life -= delta;
-      f.scale += delta * 15; // Expansión violenta
+      f.scale += delta * 4; // Expansión mucho más pequeña
       mesh.scale.setScalar(f.scale);
       
       if (f.life <= 0) {
         f.active = false;
       } else {
-        mat.opacity = f.life * 3; // Fade out rapidísimo
+        mat.opacity = f.life * 5; 
       }
     });
 
-    // Lluvia de fuego caótico (Chispas)
     sparks.current.forEach((s, i) => {
       const mesh = sparkMeshes.current[i];
       const mat = sparkMats.current[i];
@@ -221,26 +220,30 @@ function ChoreographedExplosions() {
       mesh.visible = true;
       
       s.position.addScaledVector(s.velocity, delta);
-      s.velocity.multiplyScalar(0.85); // Fricción violenta (frenan rápido tras estallar)
-      s.velocity.y -= delta * 5; // Gravedad: las ascuas caen hacia abajo
+      s.velocity.multiplyScalar(0.90); 
+      s.velocity.y -= delta * 3; 
       
+      // Rotan mientras caen
+      mesh.rotation.x += delta * 10;
+      mesh.rotation.y += delta * 10;
+
       mesh.position.copy(s.position);
       
       s.life -= delta;
-      s.scale = Math.max(0, s.scale - delta * 0.02); // Las brasas se encogen
+      s.scale = Math.max(0, s.scale - delta * 0.01); // Se encogen más lento
       mesh.scale.setScalar(s.scale);
 
       if (s.life <= 0) {
         s.active = false;
       } else {
-        mat.opacity = s.life * 2;
+        mat.opacity = s.life; 
       }
     });
   });
 
   return (
     <group>
-      {/* Meteoritos de Fuego */}
+      {/* Meteoritos Principales */}
       {pairs.current.map((p, i) => (
         <group key={`pair-${i}`}>
           <mesh ref={(el) => (mMeshesA.current[i] = el)} scale={p.mA.scale}>
@@ -254,19 +257,20 @@ function ChoreographedExplosions() {
         </group>
       ))}
 
-      {/* Destellos de Explosión (Onda Expansiva) */}
+      {/* Onda Expansiva (Pequeña) */}
       {flashes.current.map((f, i) => (
         <mesh key={`flash-${i}`} ref={(el) => (flashMeshes.current[i] = el)}>
-          <sphereGeometry args={[1, 32, 32]} />
-          <meshBasicMaterial ref={(el) => (flashMats.current[i] = el)} color="#ffeedd" transparent opacity={0} depthWrite={false} />
+          <sphereGeometry args={[1, 16, 16]} />
+          <meshBasicMaterial ref={(el) => (flashMats.current[i] = el)} color="#ffccaa" transparent opacity={0} depthWrite={false} />
         </mesh>
       ))}
 
-      {/* Chispas de Explosión (Brasas) */}
+      {/* Fragmentos de Roca en Llamas */}
       {sparks.current.map((s, i) => (
         <mesh key={`spark-${i}`} ref={(el) => (sparkMeshes.current[i] = el)}>
           <icosahedronGeometry args={[1, 0]} />
-          <meshBasicMaterial ref={(el) => (sparkMats.current[i] = el)} transparent opacity={0} depthWrite={false} />
+          {/* @ts-ignore */}
+          <meshStandardMaterial ref={(el) => (sparkMats.current[i] = el)} emissiveIntensity={4} transparent opacity={0} wireframe={true} />
         </mesh>
       ))}
     </group>
