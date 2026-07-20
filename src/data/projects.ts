@@ -18,8 +18,8 @@ export const projectsData: Project[] = [
     inProgress: true,
   },
   {
-    id: "abdobot",
-    title: "Abdobot",
+    id: "abdbot",
+    title: "Abdbot",
     description: "Software avançado focado em automação e eficiência de processos, preparado para lançamento em larga escala no mercado.",
     tags: ["Node.js", "Automação", "Arquitetura"],
     link: "https://abdbot-academy.vercel.app/",
