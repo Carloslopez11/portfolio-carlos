@@ -40,7 +40,7 @@ export default function Hero() {
       </h2>
       
       <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed mb-12">
-        "Especialista em tirar ideias do papel e transformá-las em produtos digitais de <strong className="text-white">alto impacto</strong>. Código limpo, execução rápida e Inteligência Artificial como um <strong className="text-white">multiplicador de força</strong>, não como muleta."
+        "Especialista em tirar ideias do papel e transformá-las em produtos digitais de <strong className="text-white">alto impacto</strong>. Código limpo, execução rápida e Inteligência Artificial como um <strong className="text-white">multiplicador de força</strong>."
       </p>
 
       <ul className="flex items-center justify-center gap-8">
