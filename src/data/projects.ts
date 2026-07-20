@@ -14,8 +14,7 @@ export const projectsData: Project[] = [
     title: "Structa SaaS",
     description: "Plataforma escalável construída do zero. Integração de Inteligência Artificial para otimização de processos arquitetônicos.",
     tags: ["Next.js", "React", "AI", "TailwindCSS"],
-    link: "https://github.com/Carloslopez11/structa",
-    repo: "https://github.com/Carloslopez11/structa",
+    link: "#",
     inProgress: true,
   },
   {
@@ -23,8 +22,7 @@ export const projectsData: Project[] = [
     title: "Abdobot",
     description: "Software avançado focado em automação e eficiência de processos, preparado para lançamento em larga escala no mercado.",
     tags: ["Node.js", "Automação", "Arquitetura"],
-    link: "https://github.com/Carloslopez11/abdobot",
-    repo: "https://github.com/Carloslopez11/abdobot",
+    link: "#",
     inProgress: true,
   },
   {
