@@ -14,7 +14,7 @@ export const projectsData: Project[] = [
     title: "Structa SaaS",
     description: "Plataforma escalável construída do zero. Integração de Inteligência Artificial para otimização de processos arquitetônicos.",
     tags: ["Next.js", "React", "AI", "TailwindCSS"],
-    link: "#",
+    link: "https://structa3d.co/",
     inProgress: true,
   },
   {
@@ -22,7 +22,7 @@ export const projectsData: Project[] = [
     title: "Abdobot",
     description: "Software avançado focado em automação e eficiência de processos, preparado para lançamento em larga escala no mercado.",
     tags: ["Node.js", "Automação", "Arquitetura"],
-    link: "#",
+    link: "https://abdbot-academy.vercel.app/",
     inProgress: true,
   },
   {
