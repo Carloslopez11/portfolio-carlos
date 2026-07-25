@@ -32,5 +32,13 @@ export const projectsData: Project[] = [
     tags: ["Next.js", "Framer Motion", "UI/UX"],
     link: "https://devclub-landing-six.vercel.app",
     repo: "https://github.com/Carloslopez11/-devclub-landing",
+  },
+  {
+    id: "live-translator",
+    title: "LiveTranslator AI",
+    description: "Tradução em tempo real de áudio do sistema com IA (OpenAI Whisper + GPT-4o). Interface 3D nativa com Parallax e UI Glassmorphism.",
+    tags: ["Next.js", "OpenAI", "WebRTC", "Framer Motion"],
+    link: "https://video-dubber-app.vercel.app",
+    repo: "https://github.com/Carloslopez11/video-dubber-app",
   }
 ];
